@@ -1,0 +1,12 @@
+{
+  "name": "portfolio-site",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js && node --check src/main.js"
+  },
+  "dependencies": {
+    "three": "^0.181.0"
+  }
+}

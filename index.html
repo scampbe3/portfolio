@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portal Portfolio Prototype</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&family=Rajdhani:wght@500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./src/style.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "./node_modules/three/build/three.module.js",
+          "three/addons/": "./node_modules/three/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div class="overlay" id="overlay">
+      <div class="overlay-panel">
+        <p class="eyebrow">Three.js Prototype</p>
+        <h1>Portal Room</h1>
+        <p class="overlay-copy" id="statusText">Loading scene assets...</p>
+        <button id="enterButton" type="button" disabled>Enter Scene</button>
+        <p class="controls-note">WASD to move, mouse to look, Shift to move faster, Esc to pause.</p>
+      </div>
+    </div>
+
+    <div class="hud" id="hud">
+      <div class="crosshair"></div>
+      <div class="mobile-controls" id="mobileControls" aria-hidden="true">
+        <div class="joystick move-stick" id="moveStick">
+          <div class="joystick-knob" id="moveKnob"></div>
+        </div>
+        <div class="joystick look-stick" id="lookStick">
+          <div class="joystick-knob" id="lookKnob"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      if (window.location.protocol === 'file:') {
+        const statusText = document.getElementById('statusText');
+        const enterButton = document.getElementById('enterButton');
+
+        statusText.textContent = 'Start the local server with npm start, then open http://localhost:4173/. Browsers block this Three.js scene when opened as a file.';
+        enterButton.disabled = true;
+      }
+    </script>
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
