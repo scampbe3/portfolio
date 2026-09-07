@@ -4,6 +4,10 @@ const messageTitle = document.getElementById('messageTitle');
 const messageBody = document.getElementById('messageBody');
 const formStatus = document.getElementById('formStatus');
 const sendButton = form.querySelector('button[type="submit"]');
+const isGitHubPages = window.location.hostname.endsWith('.github.io');
+const contactEndpoint = isGitHubPages
+  ? 'https://formsubmit.co/ajax/campbell.t.stephen@gmail.com'
+  : '/api/contact';
 
 function setFormStatus(message, state = '') {
   formStatus.textContent = message;
@@ -11,27 +15,39 @@ function setFormStatus(message, state = '') {
 }
 
 async function submitContactForm() {
-  const response = await fetch('/api/contact', {
+  const payload = isGitHubPages
+    ? {
+        email: senderEmail.value,
+        _replyto: senderEmail.value,
+        _subject: messageTitle.value,
+        message: messageBody.value,
+        _template: 'table',
+      }
+    : {
+        senderEmail: senderEmail.value,
+        messageTitle: messageTitle.value,
+        messageBody: messageBody.value,
+      };
+
+  const response = await fetch(contactEndpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      Accept: 'application/json',
     },
-    body: JSON.stringify({
-      senderEmail: senderEmail.value,
-      messageTitle: messageTitle.value,
-      messageBody: messageBody.value,
-    }),
+    body: JSON.stringify(payload),
   });
 
-  const result = await response.json().catch(() => ({
-    message: 'The server returned an unreadable response.',
-  }));
+  const contentType = response.headers.get('content-type') || '';
+  const result = contentType.includes('application/json')
+    ? await response.json()
+    : {};
 
-  if (!response.ok || result.ok === false) {
-    throw new Error(result.message || 'Message delivery failed.');
+  if (!response.ok || result.ok === false || result.success === 'false') {
+    throw new Error(result.message || 'Message delivery failed. Please try again.');
   }
 
-  return result.message || 'Message sent. Thank you.';
+  return 'Message sent. Thank you.';
 }
 
 form.addEventListener('submit', async (event) => {
