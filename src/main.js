@@ -16,6 +16,8 @@ const MOBILE_MOVE_ZONE_START = 0.62;
 const ROOM_WIDTH = 22;
 const ROOM_DEPTH = 28;
 const ROOM_HEIGHT = 6.9;
+const SKYLIGHT_SIDE_BORDER = 4.8;
+const SKYLIGHT_END_BORDER = 4.6;
 const ROOM_HALF_WIDTH = ROOM_WIDTH / 2;
 const ROOM_HALF_DEPTH = ROOM_DEPTH / 2;
 const PLAYER_SPAWN_X = 4.7;
@@ -31,6 +33,8 @@ const VIDEO_START_DISTANCE = 11.1;
 const VIDEO_PAUSE_DISTANCE = 14.25;
 const NPC_DIALOGUE_DURATION_MS = 8000;
 const NPC_BUMP_COOLDOWN_MS = 8500;
+const NPC_HOVER_HOLD_MS = 1000;
+const NPC_HOVER_FADE_MS = 2000;
 const CONTACT_PAGE_URL = new URL('../contact.html', import.meta.url).href;
 const DOOR_X = 4.7;
 const DOOR_Z = ROOM_HALF_DEPTH - 0.23;
@@ -238,6 +242,9 @@ const interactiveMeshes = [];
 const interactions = [];
 const artworks = [];
 const npcs = [];
+let npcHoverPrompt = null;
+let npcHoverOwner = null;
+let npcHoverHoldUntil = 0;
 const sunRayBeams = [];
 const propColliders = [];
 const videos = [];
@@ -1125,8 +1132,8 @@ function createGalleryShell(materials) {
     trimMaterial,
   );
 
-  const roofDepth = 4.6;
-  const roofSideWidth = 4.8;
+  const roofDepth = SKYLIGHT_END_BORDER;
+  const roofSideWidth = SKYLIGHT_SIDE_BORDER;
   const roofFront = new THREE.Mesh(new THREE.BoxGeometry(ROOM_WIDTH, 0.22, roofDepth), wallMaterial);
   const roofBack = roofFront.clone();
   const roofLeft = new THREE.Mesh(
@@ -1422,6 +1429,50 @@ function createMobileNpcSpeechBubble(config) {
   document.body.appendChild(element);
 
   return { element, dialogue };
+}
+
+function createNpcHoverPrompt() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 192;
+  canvas.height = 128;
+  const context = canvas.getContext('2d');
+  context.fillStyle = 'rgba(251, 250, 245, 0.98)';
+  context.strokeStyle = '#343a37';
+  context.lineWidth = 5;
+  context.beginPath();
+  context.roundRect(18, 12, 156, 82, 18);
+  context.fill();
+  context.stroke();
+  context.beginPath();
+  context.moveTo(82, 93);
+  context.lineTo(96, 113);
+  context.lineTo(110, 93);
+  context.closePath();
+  context.fill();
+  context.stroke();
+  context.fillStyle = '#303633';
+  context.font = '700 48px Georgia, serif';
+  context.textAlign = 'center';
+  context.textBaseline = 'middle';
+  context.fillText('...', 96, 48);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.generateMipmaps = false;
+  texture.minFilter = THREE.LinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  const prompt = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: texture,
+    transparent: true,
+    depthTest: false,
+    depthWrite: false,
+    toneMapped: false,
+  }));
+  prompt.center.set(0.5, 0.08);
+  prompt.scale.set(0.58, 0.39, 1);
+  prompt.renderOrder = 20;
+  prompt.visible = false;
+  return prompt;
 }
 
 function createImportedGalleryNpc(config, gltf) {
@@ -1780,6 +1831,8 @@ function createGalleryNpcs(importedModels) {
       createGalleryNpc(config);
     }
   });
+  npcHoverPrompt = createNpcHoverPrompt();
+  scene.add(npcHoverPrompt);
 }
 
 function showNpcDialogue(npc) {
@@ -2356,6 +2409,45 @@ function updateMovement(deltaSeconds) {
 
 function updateFocus(deltaSeconds) {
   const nextFocus = raycastInteraction();
+  const now = performance.now();
+  const hoverNpc = overlay.hidden
+    && nextFocus?.type === 'npc'
+    && now >= nextFocus.npc.speechUntil
+    ? nextFocus.npc
+    : null;
+
+  if (npcHoverPrompt) {
+    if (hoverNpc) {
+      npcHoverOwner = hoverNpc;
+      npcHoverHoldUntil = now + NPC_HOVER_HOLD_MS;
+    }
+
+    if (
+      !overlay.hidden
+      || (npcHoverOwner && now < npcHoverOwner.speechUntil)
+    ) {
+      npcHoverOwner = null;
+      npcHoverHoldUntil = 0;
+    }
+
+    let opacity = 0;
+    if (npcHoverOwner) {
+      if (hoverNpc === npcHoverOwner || now <= npcHoverHoldUntil) {
+        opacity = 1;
+      } else {
+        opacity = Math.max(0, 1 - (now - npcHoverHoldUntil) / NPC_HOVER_FADE_MS);
+      }
+      npcHoverOwner.bubbleAnchor.getWorldPosition(npcBubbleWorldPosition);
+      npcBubbleWorldPosition.y += 0.25 * npcHoverOwner.config.scale;
+      npcHoverPrompt.position.copy(npcBubbleWorldPosition);
+    }
+
+    npcHoverPrompt.material.opacity = opacity;
+    npcHoverPrompt.visible = opacity > 0.001;
+    if (opacity <= 0 && !hoverNpc) {
+      npcHoverOwner = null;
+    }
+  }
 
   for (const interaction of interactions) {
     const distance = horizontalDistance(controls.object.position, interaction);

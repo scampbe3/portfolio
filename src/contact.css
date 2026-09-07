@@ -53,8 +53,9 @@ body {
 
 .museum-brand {
   display: inline-flex;
-  gap: 12px;
-  align-items: center;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
   color: var(--ink);
   font-family: Georgia, "Times New Roman", serif;
   font-size: 1rem;
@@ -142,6 +143,10 @@ h1 {
   font-weight: 500;
   letter-spacing: 0;
   line-height: 0.94;
+}
+
+h1 span {
+  display: block;
 }
 
 .lede {
@@ -302,19 +307,33 @@ button:disabled {
     border-left: 0;
   }
 
+  .contact-form,
+  .lede {
+    width: 100%;
+    max-width: none;
+  }
+
   h1 {
     max-width: 100%;
   }
+
+  h1 span {
+    display: inline;
+  }
 }
 
-@media (max-width: 560px) {
+@media (max-width: 700px) {
   .museum-header {
     min-height: 64px;
     padding: 10px 16px;
   }
 
-  .museum-header p {
-    display: none;
+  .museum-brand {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 20px;
   }
 
   .contact-shell {
@@ -333,8 +352,18 @@ button:disabled {
 
   .contact-panel,
   .legacy-frame {
-    width: calc(100vw - 28px);
+    width: 100%;
     max-width: none;
+  }
+
+  .lede {
+    max-width: none;
+  }
+
+  .actions,
+  .actions > * {
+    min-width: 0;
+    max-width: 100%;
   }
 
   h1 {
