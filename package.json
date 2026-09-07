@@ -3,10 +3,15 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "node server.js",
-    "check": "node --check server.js && node --check src/main.js"
+    "build": "esbuild src/main.js --bundle --minify --format=esm --target=es2020 --outfile=src/main.min.js",
+    "start": "npm run build && node server.js",
+    "check": "node --check server.js && node --check src/main.js && node --check src/contact.js && npm run build"
   },
   "dependencies": {
+    "nodemailer": "^9.0.3",
     "three": "^0.181.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.1"
   }
 }

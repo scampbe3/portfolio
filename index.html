@@ -3,41 +3,50 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Portal Portfolio Prototype</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&family=Rajdhani:wght@500;600&display=swap" rel="stylesheet" />
+    <title>Stephen Campbell | Interactive Portfolio Gallery</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href="./assets/textures/optimized/project-1-runtime.jpg" as="image" fetchpriority="high" />
+    <link rel="preload" href="./legacy-wall-texture.png?v=20260907" as="image" />
     <link rel="stylesheet" href="./src/style.css" />
-    <script type="importmap">
-      {
-        "imports": {
-          "three": "./node_modules/three/build/three.module.js",
-          "three/addons/": "./node_modules/three/examples/jsm/"
-        }
-      }
-    </script>
   </head>
   <body>
     <div class="overlay" id="overlay">
+      <div class="loader-atmosphere" aria-hidden="true"></div>
       <div class="overlay-panel">
-        <p class="eyebrow">Three.js Prototype</p>
-        <h1>Portal Room</h1>
-        <p class="overlay-copy" id="statusText">Loading scene assets...</p>
-        <button id="enterButton" type="button" disabled>Enter Scene</button>
-        <p class="controls-note">WASD to move, mouse to look, Shift to move faster, Esc to pause.</p>
+        <p class="eyebrow">Stephen Campbell</p>
+        <div class="gallery-loader" aria-hidden="true">
+          <span class="gallery-frame-outline">
+            <span class="gallery-portrait-crop">
+              <img src="./legacy-wall-texture.png?v=20260907" alt="" />
+            </span>
+          </span>
+        </div>
+        <h1 id="overlayTitle"></h1>
+        <p class="visually-hidden" id="statusText" aria-live="polite"></p>
+        <button id="enterButton" type="button" disabled>Loading...</button>
+        <p class="controls-note" id="controlsNote">MOVE: ARROWS / W A S D
+LOOK: MOUSE
+SPRINT: SHIFT</p>
       </div>
     </div>
 
     <div class="hud" id="hud">
-      <div class="crosshair"></div>
-      <div class="mobile-controls" id="mobileControls" aria-hidden="true">
-        <div class="joystick move-stick" id="moveStick">
-          <div class="joystick-knob" id="moveKnob"></div>
-        </div>
-        <div class="joystick look-stick" id="lookStick">
-          <div class="joystick-knob" id="lookKnob"></div>
-        </div>
-      </div>
+      <div class="scene-vignette" aria-hidden="true"></div>
+    </div>
+
+    <div class="mobile-zone-guide" aria-hidden="true">
+      <span class="mobile-zone-bar mobile-zone-turn">
+        <span class="mobile-zone-key">
+          <span class="mobile-zone-glyph">&#8596;</span>
+          <span class="mobile-zone-label">Swipe to turn</span>
+        </span>
+      </span>
+      <span class="mobile-zone-bar mobile-zone-move">
+        <span class="mobile-zone-key">
+          <span class="mobile-zone-glyph"><span>&#8597;</span><span>&#8596;</span></span>
+          <span class="mobile-zone-label">Drag to move</span>
+        </span>
+      </span>
     </div>
 
     <script>
@@ -45,10 +54,10 @@
         const statusText = document.getElementById('statusText');
         const enterButton = document.getElementById('enterButton');
 
-        statusText.textContent = 'Start the local server with npm start, then open http://localhost:4173/. Browsers block this Three.js scene when opened as a file.';
+        statusText.textContent = 'Start the local server with npm start, then open http://localhost:4173/. Browsers block this Three.js gallery when opened as a file.';
         enterButton.disabled = true;
       }
     </script>
-    <script type="module" src="./src/main.js"></script>
+    <script type="module" src="./src/main.min.js"></script>
   </body>
 </html>
