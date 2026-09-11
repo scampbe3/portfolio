@@ -1966,11 +1966,10 @@ function updateNpcs(deltaSeconds, elapsedSeconds) {
   }
 }
 
-function createContactDoor(hostTexture, oakTexture, materials) {
+function createContactDoor(oakTexture, materials) {
   const group = new THREE.Group();
   const doorHeight = 3.2;
   const doorCenterY = doorHeight / 2;
-  const portraitY = 2.18;
   const glassDoorMaterial = new THREE.MeshPhysicalMaterial({
     color: '#cfe9ed',
     transparent: true,
@@ -2000,23 +1999,6 @@ function createContactDoor(hostTexture, oakTexture, materials) {
   centerMullion.position.set(0, doorCenterY, -0.035);
   const lowerRail = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.1, 0.16), frameMaterial);
   lowerRail.position.set(0, 0.08, -0.035);
-
-  const portraitTexture = createPortraitCropTexture(hostTexture);
-  const portrait = new THREE.Mesh(
-    new THREE.PlaneGeometry(1.62, 1.4),
-    new THREE.MeshBasicMaterial({ map: portraitTexture, toneMapped: false }),
-  );
-  portrait.position.set(0, portraitY, -0.115);
-  portrait.rotation.y = Math.PI;
-
-  const portraitTop = new THREE.Mesh(new THREE.BoxGeometry(1.84, 0.12, 0.12), frameMaterial);
-  const portraitBottom = portraitTop.clone();
-  const portraitLeft = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.62, 0.12), frameMaterial);
-  const portraitRight = portraitLeft.clone();
-  portraitTop.position.set(0, portraitY + 0.74, -0.12);
-  portraitBottom.position.set(0, portraitY - 0.74, -0.12);
-  portraitLeft.position.set(-0.86, portraitY, -0.12);
-  portraitRight.position.set(0.86, portraitY, -0.12);
 
   const hardwareMaterial = new THREE.MeshStandardMaterial({
     color: '#c7d1d1',
@@ -2061,11 +2043,6 @@ function createContactDoor(hostTexture, oakTexture, materials) {
     topFrame,
     centerMullion,
     lowerRail,
-    portrait,
-    portraitTop,
-    portraitBottom,
-    portraitLeft,
-    portraitRight,
     handleBase,
     handle,
     handleBaseRight,
@@ -2085,13 +2062,13 @@ function createContactDoor(hostTexture, oakTexture, materials) {
     new THREE.PlaneGeometry(1.45, 1.92),
     new THREE.MeshBasicMaterial({ map: createContactPlacardTexture(), toneMapped: false }),
   );
-  placard.position.set(DOOR_X + 2.62, 1.72, DOOR_Z - 0.12);
+  placard.position.set(DOOR_X - 2.62, 1.72, DOOR_Z - 0.12);
   placard.rotation.y = Math.PI;
   const placardBacking = new THREE.Mesh(
     new THREE.BoxGeometry(1.57, 2.04, 0.055),
     frameMaterial,
   );
-  placardBacking.position.set(DOOR_X + 2.62, 1.72, DOOR_Z - 0.075);
+  placardBacking.position.set(DOOR_X - 2.62, 1.72, DOOR_Z - 0.075);
   scene.add(placard, placardBacking);
 
   const interaction = {
@@ -2106,11 +2083,6 @@ function createContactDoor(hostTexture, oakTexture, materials) {
     sideFrameLeft,
     sideFrameRight,
     topFrame,
-    portrait,
-    portraitTop,
-    portraitBottom,
-    portraitLeft,
-    portraitRight,
     handleBase,
     handle,
     handleBaseRight,
@@ -2643,15 +2615,13 @@ async function initialize() {
   const texturePromises = GALLERY_PROJECTS.map((project) => (
     loadTexture(project.screenshot)
   ));
-  const doorTexturePromise = loadTexture('../host.png');
   const skyboxPromise = loadTexture('../assets/textures/optimized/gallery-sky-runtime.jpg');
   const modelPromises = GALLERY_NPCS
     .filter((config) => config.model)
     .map((config) => loadGalleryModel(config.model));
   const treeModelPromises = TREE_MODEL_URLS.map((url) => loadGalleryModel(url));
-  const [projectTextures, doorTexture, skyboxTexture, modelEntries, treeModelEntries] = await Promise.all([
+  const [projectTextures, skyboxTexture, modelEntries, treeModelEntries] = await Promise.all([
     Promise.all(texturePromises),
-    doorTexturePromise,
     skyboxPromise,
     Promise.all(modelPromises),
     Promise.all(treeModelPromises),
@@ -2665,7 +2635,7 @@ async function initialize() {
     createArtwork(project, projectTextures[index]);
   });
   createGalleryNpcs(importedModels);
-  createContactDoor(doorTexture, materials.oakTexture, materials);
+  createContactDoor(materials.oakTexture, materials);
   if (previewMode && previewView?.startsWith('npc')) {
     const requestedIndex = Number.parseInt(previewView.slice(3), 10);
     const npcIndex = Number.isFinite(requestedIndex)
