@@ -1065,24 +1065,43 @@ function createGalleryShell(materials) {
   const wallHeight = CLERESTORY_SILL_Y;
   const wallY = wallHeight / 2;
   const backWall = new THREE.Mesh(new THREE.BoxGeometry(ROOM_WIDTH, wallHeight, 0.25), wallMaterial);
-  const frontWall = backWall.clone();
+  const entranceOpeningWidth = 4.8;
+  const frontWallLeftWidth = DOOR_X - entranceOpeningWidth / 2 + ROOM_HALF_WIDTH;
+  const frontWallRightWidth = ROOM_WIDTH - frontWallLeftWidth - entranceOpeningWidth;
+  const frontWallLeft = new THREE.Mesh(
+    new THREE.BoxGeometry(frontWallLeftWidth, wallHeight, 0.25),
+    wallMaterial,
+  );
+  const frontWallRight = new THREE.Mesh(
+    new THREE.BoxGeometry(frontWallRightWidth, wallHeight, 0.25),
+    wallMaterial,
+  );
   const leftWall = new THREE.Mesh(new THREE.BoxGeometry(0.25, wallHeight, ROOM_DEPTH), wallMaterial);
   const rightWall = leftWall.clone();
   backWall.position.set(0, wallY, -ROOM_HALF_DEPTH);
-  frontWall.position.set(0, wallY, ROOM_HALF_DEPTH);
+  frontWallLeft.position.set(-ROOM_HALF_WIDTH + frontWallLeftWidth / 2, wallY, ROOM_HALF_DEPTH);
+  frontWallRight.position.set(ROOM_HALF_WIDTH - frontWallRightWidth / 2, wallY, ROOM_HALF_DEPTH);
   leftWall.position.set(-ROOM_HALF_WIDTH, wallY, 0);
   rightWall.position.set(ROOM_HALF_WIDTH, wallY, 0);
-  scene.add(backWall, frontWall, leftWall, rightWall);
+  scene.add(backWall, frontWallLeft, frontWallRight, leftWall, rightWall);
 
   const baseboardBack = new THREE.Mesh(new THREE.BoxGeometry(ROOM_WIDTH, 0.16, 0.13), trimMaterial);
-  const baseboardFront = baseboardBack.clone();
+  const baseboardFrontLeft = new THREE.Mesh(
+    new THREE.BoxGeometry(frontWallLeftWidth, 0.16, 0.13),
+    trimMaterial,
+  );
+  const baseboardFrontRight = new THREE.Mesh(
+    new THREE.BoxGeometry(frontWallRightWidth, 0.16, 0.13),
+    trimMaterial,
+  );
   const baseboardLeft = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.16, ROOM_DEPTH), trimMaterial);
   const baseboardRight = baseboardLeft.clone();
   baseboardBack.position.set(0, 0.08, -ROOM_HALF_DEPTH + 0.15);
-  baseboardFront.position.set(0, 0.08, ROOM_HALF_DEPTH - 0.15);
+  baseboardFrontLeft.position.set(-ROOM_HALF_WIDTH + frontWallLeftWidth / 2, 0.08, ROOM_HALF_DEPTH - 0.15);
+  baseboardFrontRight.position.set(ROOM_HALF_WIDTH - frontWallRightWidth / 2, 0.08, ROOM_HALF_DEPTH - 0.15);
   baseboardLeft.position.set(-ROOM_HALF_WIDTH + 0.15, 0.08, 0);
   baseboardRight.position.set(ROOM_HALF_WIDTH - 0.15, 0.08, 0);
-  scene.add(baseboardBack, baseboardFront, baseboardLeft, baseboardRight);
+  scene.add(baseboardBack, baseboardFrontLeft, baseboardFrontRight, baseboardLeft, baseboardRight);
 
   const clerestoryHeight = ROOM_HEIGHT - wallHeight;
   const clerestoryY = wallHeight + clerestoryHeight / 2;
@@ -1946,35 +1965,42 @@ function updateNpcs(deltaSeconds, elapsedSeconds) {
   }
 }
 
-function createContactDoor(legacyTexture, oakTexture, materials) {
+function createContactDoor(hostTexture, oakTexture, materials) {
   const group = new THREE.Group();
   const doorHeight = 3.2;
   const doorCenterY = doorHeight / 2;
   const portraitY = 2.18;
-  const doorMaterial = new THREE.MeshStandardMaterial({
-    color: '#92775b',
-    map: oakTexture,
-    roughness: 0.46,
-    metalness: 0.03,
+  const glassDoorMaterial = new THREE.MeshPhysicalMaterial({
+    color: '#cfe9ed',
+    transparent: true,
+    opacity: 0.34,
+    roughness: 0.12,
+    metalness: 0.08,
+    transmission: 0.08,
+    side: THREE.DoubleSide,
   });
-  const door = new THREE.Mesh(new THREE.BoxGeometry(2.75, doorHeight, 0.18), doorMaterial);
-  door.position.y = doorCenterY;
+  const leftDoor = new THREE.Mesh(new THREE.BoxGeometry(1.42, doorHeight, 0.08), glassDoorMaterial);
+  const rightDoor = leftDoor.clone();
+  leftDoor.position.set(-0.73, doorCenterY, 0);
+  rightDoor.position.set(0.73, doorCenterY, 0);
 
   const frameMaterial = new THREE.MeshStandardMaterial({
-    color: '#c49a69',
-    map: oakTexture,
-    emissive: '#a67443',
-    emissiveIntensity: 0.012,
-    roughness: 0.38,
+    color: '#26343a',
+    roughness: 0.3,
+    metalness: 0.5,
   });
-  const sideFrameLeft = new THREE.Mesh(new THREE.BoxGeometry(0.18, doorHeight + 0.3, 0.24), frameMaterial);
+  const sideFrameLeft = new THREE.Mesh(new THREE.BoxGeometry(0.12, doorHeight + 0.3, 0.16), frameMaterial);
   const sideFrameRight = sideFrameLeft.clone();
-  const topFrame = new THREE.Mesh(new THREE.BoxGeometry(3.18, 0.18, 0.24), frameMaterial);
+  const topFrame = new THREE.Mesh(new THREE.BoxGeometry(3.18, 0.12, 0.16), frameMaterial);
   sideFrameLeft.position.set(-1.48, doorCenterY + 0.06, -0.035);
   sideFrameRight.position.set(1.48, doorCenterY + 0.06, -0.035);
   topFrame.position.set(0, doorHeight + 0.11, -0.035);
+  const centerMullion = new THREE.Mesh(new THREE.BoxGeometry(0.1, doorHeight, 0.16), frameMaterial);
+  centerMullion.position.set(0, doorCenterY, -0.035);
+  const lowerRail = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.1, 0.16), frameMaterial);
+  lowerRail.position.set(0, 0.08, -0.035);
 
-  const portraitTexture = createPortraitCropTexture(legacyTexture);
+  const portraitTexture = createPortraitCropTexture(hostTexture);
   const portrait = new THREE.Mesh(
     new THREE.PlaneGeometry(1.62, 1.4),
     new THREE.MeshBasicMaterial({ map: portraitTexture, toneMapped: false }),
@@ -1992,23 +2018,48 @@ function createContactDoor(legacyTexture, oakTexture, materials) {
   portraitRight.position.set(0.86, portraitY, -0.12);
 
   const hardwareMaterial = new THREE.MeshStandardMaterial({
-    color: '#80684d',
+    color: '#c7d1d1',
     roughness: 0.24,
     metalness: 0.76,
   });
   const handleBase = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 0.045, 24), hardwareMaterial);
-  handleBase.position.set(-0.91, 1.08, -0.15);
+  handleBase.position.set(-0.18, 1.08, -0.15);
   handleBase.rotation.x = Math.PI / 2;
   const handle = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.06, 0.065), hardwareMaterial);
-  handle.position.set(-0.78, 1.08, -0.19);
-  const kickPlate = new THREE.Mesh(new THREE.BoxGeometry(2.15, 0.42, 0.035), hardwareMaterial);
-  kickPlate.position.set(0, 0.37, -0.12);
+  handle.position.set(-0.03, 1.08, -0.19);
+  const handleBaseRight = handleBase.clone();
+  handleBaseRight.position.x = 0.18;
+  const handleRight = handle.clone();
+  handleRight.position.x = 0.03;
+  const entranceCanopy = new THREE.Mesh(
+    new THREE.BoxGeometry(4.7, 0.16, 1.15),
+    new THREE.MeshStandardMaterial({ color: '#e7dfcf', roughness: 0.76 }),
+  );
+  entranceCanopy.position.set(0, doorHeight + 0.55, 0.34);
+  const canopyTrim = new THREE.Mesh(new THREE.BoxGeometry(4.75, 0.12, 0.12), frameMaterial);
+  canopyTrim.position.set(0, doorHeight + 0.45, -0.24);
+  const entranceLanding = new THREE.Mesh(
+    new THREE.BoxGeometry(5.9, 0.08, 4.2),
+    materials.floorMaterial,
+  );
+  entranceLanding.position.set(0, -0.05, 1.8);
+  const planterMaterial = new THREE.MeshStandardMaterial({
+    color: '#71833d',
+    roughness: 0.92,
+  });
+  const leftPlanter = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.34, 1.55), planterMaterial);
+  const rightPlanter = leftPlanter.clone();
+  leftPlanter.position.set(-2.45, 0.17, 1.65);
+  rightPlanter.position.set(2.45, 0.17, 1.65);
 
   group.add(
-    door,
+    leftDoor,
+    rightDoor,
     sideFrameLeft,
     sideFrameRight,
     topFrame,
+    centerMullion,
+    lowerRail,
     portrait,
     portraitTop,
     portraitBottom,
@@ -2016,7 +2067,13 @@ function createContactDoor(legacyTexture, oakTexture, materials) {
     portraitRight,
     handleBase,
     handle,
-    kickPlate,
+    handleBaseRight,
+    handleRight,
+    entranceCanopy,
+    canopyTrim,
+    entranceLanding,
+    leftPlanter,
+    rightPlanter,
   );
   group.position.set(DOOR_X, 0, DOOR_Z);
   group.name = 'contact door';
@@ -2043,7 +2100,8 @@ function createContactDoor(legacyTexture, oakTexture, materials) {
     horizontalPosition: new THREE.Vector2(DOOR_X, DOOR_Z),
   };
   for (const mesh of [
-    door,
+    leftDoor,
+    rightDoor,
     sideFrameLeft,
     sideFrameRight,
     topFrame,
@@ -2054,7 +2112,10 @@ function createContactDoor(legacyTexture, oakTexture, materials) {
     portraitRight,
     handleBase,
     handle,
-    kickPlate,
+    handleBaseRight,
+    handleRight,
+    entranceCanopy,
+    canopyTrim,
     placard,
     placardBacking,
   ]) {
