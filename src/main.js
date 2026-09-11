@@ -415,7 +415,7 @@ function createContactPlacardTexture() {
   const context = canvas.getContext('2d');
   context.fillStyle = '#f6f3ea';
   context.fillRect(0, 0, canvas.width, canvas.height);
-  context.fillStyle = '#c88d56';
+  context.fillStyle = '#000000';
   context.fillRect(0, 0, canvas.width, 18);
   context.fillStyle = '#1f2522';
   context.font = '600 62px Segoe UI, Arial, sans-serif';
@@ -437,40 +437,13 @@ function createContactPlacardTexture() {
   context.font = '500 25px Segoe UI, Arial, sans-serif';
   context.fillText('campbell.t.stephen', 44, 430);
   context.fillText('@gmail.com', 44, 470);
-  context.fillStyle = '#a66d3f';
+  context.fillStyle = '#000000';
   context.font = '600 25px Segoe UI, Arial, sans-serif';
   context.fillText(`${interactionVerb} OR WALK THROUGH`, 44, 626);
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  return texture;
-}
-
-function createWelcomeSignTexture() {
-  const canvas = document.createElement('canvas');
-  canvas.width = 512;
-  canvas.height = 1024;
-  const context = canvas.getContext('2d');
-  context.fillStyle = '#20313f';
-  context.fillRect(0, 0, canvas.width, canvas.height);
-  context.fillStyle = '#f7f4eb';
-  context.textAlign = 'center';
-  context.font = 'italic 58px Georgia, serif';
-  context.fillText('Welcome', 256, 112);
-  context.fillRect(172, 138, 168, 3);
-  context.font = '600 44px Arial, sans-serif';
-  ['LISTEN', 'LEARN', 'WATCH', 'PLAY'].forEach((label, index) => {
-    const y = 300 + index * 180;
-    context.beginPath();
-    context.arc(256, y - 54, 18, 0, Math.PI * 2);
-    context.fill();
-    context.fillText(label, 256, y + 28);
-  });
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  texture.minFilter = THREE.LinearFilter;
-  texture.magFilter = THREE.LinearFilter;
   return texture;
 }
 
@@ -834,11 +807,11 @@ function createExteriorScenery(treeModels) {
     { position: new THREE.Vector3(18.2, 1.76, 6.6), height: 4.55, rotation: 2.05, model: 2 },
 
     // Front wall: two loose clusters with varied setbacks and an open central gap.
-    { position: new THREE.Vector3(-9.2, 0, 21.4), height: 4.65, rotation: 0.45, model: 2 },
-    { position: new THREE.Vector3(-3.1, 0, 24.2), height: 6.15, rotation: 2.9, model: 2 },
-    { position: new THREE.Vector3(10.4, 0, 22.8), height: 6.45, rotation: 1.55, model: 2 },
-    { position: new THREE.Vector3(-7.0, 0, 23.1), height: 5.3, rotation: 2.2, model: 1 },
-    { position: new THREE.Vector3(0.2, 0, 23.6), height: 4.8, rotation: 0.3, model: 3 },
+    { position: new THREE.Vector3(-8.6, 1.28, 18.2), height: 4.65, rotation: 0.45, model: 2 },
+    { position: new THREE.Vector3(-2.4, 2.54, 22.1), height: 6.15, rotation: 2.9, model: 2 },
+    { position: new THREE.Vector3(10.1, 1.72, 20.2), height: 6.45, rotation: 1.55, model: 2 },
+    { position: new THREE.Vector3(-6.2, 1.86, 20.4), height: 5.3, rotation: 2.2, model: 1 },
+    { position: new THREE.Vector3(0.4, 1.38, 20.8), height: 4.8, rotation: 0.3, model: 3 },
   ];
   trees.forEach((config) => {
     const source = treeModels.get(TREE_MODEL_URLS[config.model]);
@@ -1993,7 +1966,7 @@ function updateNpcs(deltaSeconds, elapsedSeconds) {
   }
 }
 
-function createContactDoor(materials, treeModels) {
+function createContactDoor(materials) {
   const group = new THREE.Group();
   const doorHeight = 3.18;
   const doorCenterY = doorHeight / 2;
@@ -2003,13 +1976,13 @@ function createContactDoor(materials, treeModels) {
     metalness: 0.58,
   });
   const glassMaterial = new THREE.MeshPhysicalMaterial({
-    color: '#d9eef2',
-    transparent: true,
-    opacity: 0.2,
-    roughness: 0.08,
+    color: '#b8c7c8',
+    transparent: false,
+    opacity: 1,
+    roughness: 0.64,
     metalness: 0.03,
-    transmission: 0.16,
-    depthWrite: false,
+    transmission: 0,
+    depthWrite: true,
     side: THREE.DoubleSide,
   });
   const hardwareMaterial = new THREE.MeshStandardMaterial({
@@ -2041,6 +2014,11 @@ function createContactDoor(materials, treeModels) {
   const bottomFrame = topFrame.clone();
   topFrame.position.set(0, doorHeight + 0.02, -0.035);
   bottomFrame.position.set(0, 0.05, -0.035);
+  const sideJambGeometry = new THREE.BoxGeometry(0.16, doorHeight + 0.1, 0.48);
+  const leftJamb = new THREE.Mesh(sideJambGeometry, frameMaterial);
+  const rightJamb = leftJamb.clone();
+  leftJamb.position.set(-2.32, doorCenterY, 0.13);
+  rightJamb.position.set(2.32, doorCenterY, 0.13);
 
   const pullLeft = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.72, 0.065), hardwareMaterial);
   const pullRight = pullLeft.clone();
@@ -2058,126 +2036,6 @@ function createContactDoor(materials, treeModels) {
   const soffitEdge = new THREE.Mesh(new THREE.BoxGeometry(4.8, 0.075, 0.08), frameMaterial);
   soffitEdge.position.set(0, doorHeight + 0.14, -0.22);
 
-  const plaza = new THREE.Mesh(new THREE.BoxGeometry(18, 0.06, 15), materials.floorMaterial);
-  plaza.position.set(0, -0.045, 7.25);
-  plaza.receiveShadow = true;
-  const walkway = new THREE.Mesh(new THREE.BoxGeometry(5.6, 0.065, 14), materials.floorMaterial);
-  walkway.position.set(0, -0.005, 7.1);
-  walkway.receiveShadow = true;
-
-  const lawnMaterial = new THREE.MeshStandardMaterial({ color: '#82a83d', roughness: 0.96 });
-  const leftLawn = new THREE.Mesh(new THREE.BoxGeometry(5.8, 0.08, 11.6), lawnMaterial);
-  const rightLawn = leftLawn.clone();
-  leftLawn.position.set(-5.8, 0.005, 8.2);
-  rightLawn.position.set(5.8, 0.005, 8.2);
-
-  const pavingJointMaterial = new THREE.MeshBasicMaterial({ color: '#b7b8b2' });
-  const pavingJoints = [];
-  for (let z = 1.2; z <= 13.2; z += 2) {
-    const joint = new THREE.Mesh(new THREE.BoxGeometry(5.6, 0.008, 0.025), pavingJointMaterial);
-    joint.position.set(0, 0.034, z);
-    pavingJoints.push(joint);
-  }
-  for (const x of [-1.85, 1.85]) {
-    const joint = new THREE.Mesh(new THREE.BoxGeometry(0.025, 0.008, 14), pavingJointMaterial);
-    joint.position.set(x, 0.034, 7.1);
-    pavingJoints.push(joint);
-  }
-
-  const planterBaseMaterial = new THREE.MeshStandardMaterial({
-    color: '#b8b8b1',
-    roughness: 0.88,
-  });
-  const shrubMaterials = [
-    new THREE.MeshStandardMaterial({ color: '#73952f', roughness: 0.92 }),
-    new THREE.MeshStandardMaterial({ color: '#91ad35', roughness: 0.92 }),
-    new THREE.MeshStandardMaterial({ color: '#587b2d', roughness: 0.92 }),
-  ];
-  const planterMeshes = [];
-  for (const side of [-1, 1]) {
-    const planter = new THREE.Mesh(
-      new THREE.BoxGeometry(2.2, 0.38, 3.4),
-      planterBaseMaterial,
-    );
-    planter.position.set(side * 4.35, 0.2, 3.3);
-    planterMeshes.push(planter);
-    const shrubOffsets = [
-      [-0.62, -1.0, 0.44],
-      [0.1, -0.92, 0.5],
-      [0.66, -0.48, 0.4],
-      [-0.48, -0.12, 0.52],
-      [0.32, 0.08, 0.46],
-      [0.62, 0.72, 0.5],
-      [-0.25, 1.02, 0.42],
-    ];
-    shrubOffsets.forEach(([offsetX, offsetZ, scale], index) => {
-      const shrub = new THREE.Mesh(
-        new THREE.IcosahedronGeometry(0.72, 1),
-        shrubMaterials[index % shrubMaterials.length],
-      );
-      shrub.position.set(side * 4.35 + offsetX, 0.6, 3.3 + offsetZ);
-      shrub.scale.set(scale * 1.35, scale, scale * 1.1);
-      planterMeshes.push(shrub);
-    });
-  }
-
-  const benchMaterial = new THREE.MeshStandardMaterial({ color: '#b87735', roughness: 0.62 });
-  const benchLegMaterial = new THREE.MeshStandardMaterial({ color: '#292d2d', roughness: 0.42 });
-  const exteriorMeshes = [];
-  for (const side of [-1, 1]) {
-    const bench = new THREE.Group();
-    const seat = new THREE.Mesh(new THREE.BoxGeometry(2.25, 0.14, 0.48), benchMaterial);
-    const legA = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.52, 0.34), benchLegMaterial);
-    const legB = legA.clone();
-    seat.position.y = 0.54;
-    legA.position.set(-0.72, 0.26, 0);
-    legB.position.set(0.72, 0.26, 0);
-    bench.add(seat, legA, legB);
-    bench.position.set(side * 5.25, 0.04, 7.75);
-    bench.rotation.y = side * 0.08;
-    exteriorMeshes.push(bench);
-  }
-
-  const signBoard = new THREE.Mesh(
-    new THREE.PlaneGeometry(1.25, 2.5),
-    new THREE.MeshBasicMaterial({ map: createWelcomeSignTexture(), toneMapped: false }),
-  );
-  signBoard.position.set(-6.75, 2.05, 5.8);
-  signBoard.rotation.y = 0.18;
-  const signPost = new THREE.Mesh(new THREE.BoxGeometry(0.09, 3.8, 0.09), frameMaterial);
-  signPost.position.set(-7.42, 1.85, 5.82);
-  exteriorMeshes.push(signBoard, signPost);
-
-  const entranceTrees = [];
-  const treeConfigs = [
-    { model: 1, x: -7.5, z: 9.5, height: 6.6, rotation: 0.4 },
-    { model: 2, x: -5.6, z: 12.2, height: 5.5, rotation: 1.8 },
-    { model: 1, x: 7.2, z: 10.1, height: 6.2, rotation: 2.5 },
-    { model: 2, x: 5.6, z: 13.1, height: 5.8, rotation: 0.9 },
-  ];
-  treeConfigs.forEach((config) => {
-    const source = treeModels.get(TREE_MODEL_URLS[config.model]);
-    if (!source) return;
-    const tree = source.scene.clone(true);
-    tree.updateMatrixWorld(true);
-    const bounds = new THREE.Box3().setFromObject(tree);
-    const size = bounds.getSize(new THREE.Vector3());
-    tree.scale.setScalar(config.height / Math.max(size.y, 0.001));
-    tree.updateMatrixWorld(true);
-    bounds.setFromObject(tree);
-    tree.position.set(
-      -(bounds.min.x + bounds.max.x) * 0.5,
-      -bounds.min.y,
-      -(bounds.min.z + bounds.max.z) * 0.5,
-    );
-    const treeGroup = new THREE.Group();
-    treeGroup.add(tree);
-    treeGroup.position.set(config.x, 0, config.z);
-    treeGroup.rotation.y = config.rotation;
-    setMeshShadows(treeGroup, true, false);
-    entranceTrees.push(treeGroup);
-  });
-
   group.add(
     leftDoor,
     rightDoor,
@@ -2186,19 +2044,13 @@ function createContactDoor(materials, treeModels) {
     ...verticalFrames,
     topFrame,
     bottomFrame,
+    leftJamb,
+    rightJamb,
     pullLeft,
     pullRight,
     facadeHeader,
     soffit,
     soffitEdge,
-    plaza,
-    walkway,
-    leftLawn,
-    rightLawn,
-    ...pavingJoints,
-    ...planterMeshes,
-    ...exteriorMeshes,
-    ...entranceTrees,
   );
   group.position.set(DOOR_X, 0, DOOR_Z);
   group.name = 'contact door';
@@ -2211,12 +2063,7 @@ function createContactDoor(materials, treeModels) {
   );
   placard.position.set(DOOR_X + 3.35, 1.72, DOOR_Z - 0.12);
   placard.rotation.y = Math.PI;
-  const placardBacking = new THREE.Mesh(
-    new THREE.BoxGeometry(1.57, 2.04, 0.055),
-    frameMaterial,
-  );
-  placardBacking.position.set(DOOR_X + 3.35, 1.72, DOOR_Z - 0.075);
-  scene.add(placard, placardBacking);
+  scene.add(placard);
 
   const interaction = {
     type: 'contact',
@@ -2232,12 +2079,13 @@ function createContactDoor(materials, treeModels) {
     ...verticalFrames,
     topFrame,
     bottomFrame,
+    leftJamb,
+    rightJamb,
     pullLeft,
     pullRight,
     soffit,
     soffitEdge,
     placard,
-    placardBacking,
   ]) {
     attachInteraction(mesh, interaction);
   }
@@ -2782,7 +2630,7 @@ async function initialize() {
     createArtwork(project, projectTextures[index]);
   });
   createGalleryNpcs(importedModels);
-  createContactDoor(materials, importedTrees);
+  createContactDoor(materials);
   if (previewMode && previewView?.startsWith('npc')) {
     const requestedIndex = Number.parseInt(previewView.slice(3), 10);
     const npcIndex = Number.isFinite(requestedIndex)
