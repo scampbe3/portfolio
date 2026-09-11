@@ -1176,7 +1176,8 @@ function createGalleryShell(materials) {
   );
 
   setMeshShadows(backWall, true, true);
-  setMeshShadows(frontWall, true, true);
+  setMeshShadows(frontWallLeft, true, true);
+  setMeshShadows(frontWallRight, true, true);
   setMeshShadows(leftWall, true, true);
   setMeshShadows(rightWall, true, true);
   setMeshShadows(roofFront, true, true);
