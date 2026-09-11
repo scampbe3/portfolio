@@ -2581,15 +2581,15 @@ async function initialize() {
   const texturePromises = GALLERY_PROJECTS.map((project) => (
     loadTexture(project.screenshot)
   ));
-  const legacyPromise = loadTexture('../assets/textures/optimized/legacy-wall-runtime.jpg');
+  const doorTexturePromise = loadTexture('../host.png');
   const skyboxPromise = loadTexture('../assets/textures/optimized/gallery-sky-runtime.jpg');
   const modelPromises = GALLERY_NPCS
     .filter((config) => config.model)
     .map((config) => loadGalleryModel(config.model));
   const treeModelPromises = TREE_MODEL_URLS.map((url) => loadGalleryModel(url));
-  const [projectTextures, legacyTexture, skyboxTexture, modelEntries, treeModelEntries] = await Promise.all([
+  const [projectTextures, doorTexture, skyboxTexture, modelEntries, treeModelEntries] = await Promise.all([
     Promise.all(texturePromises),
-    legacyPromise,
+    doorTexturePromise,
     skyboxPromise,
     Promise.all(modelPromises),
     Promise.all(treeModelPromises),
@@ -2603,7 +2603,7 @@ async function initialize() {
     createArtwork(project, projectTextures[index]);
   });
   createGalleryNpcs(importedModels);
-  createContactDoor(legacyTexture, materials.oakTexture, materials);
+  createContactDoor(doorTexture, materials.oakTexture, materials);
   if (previewMode && previewView?.startsWith('npc')) {
     const requestedIndex = Number.parseInt(previewView.slice(3), 10);
     const npcIndex = Number.isFinite(requestedIndex)
