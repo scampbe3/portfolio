@@ -410,49 +410,40 @@ function createPlacardTexture(title, category, accent) {
 
 function createContactPlacardTexture() {
   const canvas = document.createElement('canvas');
-  canvas.width = 768;
-  canvas.height = 300;
+  canvas.width = 540;
+  canvas.height = 720;
   const context = canvas.getContext('2d');
-  context.fillStyle = '#f7f5ef';
+  context.fillStyle = '#f6f3ea';
   context.fillRect(0, 0, canvas.width, canvas.height);
   context.fillStyle = '#000000';
-  context.fillRect(0, 0, 16, canvas.height);
-  context.fillStyle = '#202522';
-  context.font = '600 48px Segoe UI, Arial, sans-serif';
-  context.fillText('Contact', 54, 82);
-  context.fillStyle = '#636963';
-  context.font = '400 30px Segoe UI, Arial, sans-serif';
-  context.fillText('Start the conversation.', 54, 136);
+  context.fillRect(0, 0, canvas.width, 18);
+  context.fillStyle = '#1f2522';
+  context.font = '600 62px Segoe UI, Arial, sans-serif';
+  context.fillText('CONTACT', 44, 112);
+  context.strokeStyle = '#c8c4ba';
+  context.lineWidth = 2;
+  context.beginPath();
+  context.moveTo(44, 154);
+  context.lineTo(496, 154);
+  context.stroke();
+  context.fillStyle = '#3f4742';
+  context.font = '500 36px Segoe UI, Arial, sans-serif';
+  context.fillText('Stephen Campbell', 44, 232);
+  context.fillStyle = '#767c76';
+  context.font = '400 27px Segoe UI, Arial, sans-serif';
+  context.fillText('WEB + INTERACTIVE', 44, 286);
+  context.fillText('PROJECT INQUIRIES', 44, 330);
   context.fillStyle = '#292f2b';
   context.font = '500 25px Segoe UI, Arial, sans-serif';
-  context.fillText('campbell.t.stephen@gmail.com', 54, 190);
-  context.fillStyle = '#777d77';
-  context.font = '600 20px Segoe UI, Arial, sans-serif';
-  context.fillText(`${interactionVerb} OR WALK THROUGH`, 54, 252);
+  context.fillText('campbell.t.stephen', 44, 430);
+  context.fillText('@gmail.com', 44, 470);
+  context.fillStyle = '#000000';
+  context.font = '600 25px Segoe UI, Arial, sans-serif';
+  context.fillText(`${interactionVerb} OR WALK THROUGH`, 44, 626);
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  return texture;
-}
-
-function createContactHeaderTexture() {
-  const canvas = document.createElement('canvas');
-  canvas.width = 1024;
-  canvas.height = 180;
-  const context = canvas.getContext('2d');
-  context.clearRect(0, 0, canvas.width, canvas.height);
-  context.fillStyle = '#202522';
-  context.textAlign = 'center';
-  context.font = '600 54px Segoe UI, Arial, sans-serif';
-  context.fillText('C O N T A C T', canvas.width / 2, 78);
-  context.fillStyle = '#676d68';
-  context.font = '500 23px Segoe UI, Arial, sans-serif';
-  context.fillText('STEPHEN CAMPBELL', canvas.width / 2, 126);
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  texture.minFilter = THREE.LinearFilter;
-  texture.magFilter = THREE.LinearFilter;
   return texture;
 }
 
@@ -1597,6 +1588,19 @@ function createImportedGalleryNpc(config, gltf) {
     horizontalPosition: npc.horizontalPosition,
   };
   npc.interaction = interaction;
+  const interactionVolume = new THREE.Mesh(
+    new THREE.BoxGeometry(0.82, 1.95, 0.72),
+    new THREE.MeshBasicMaterial({
+      transparent: true,
+      opacity: 0,
+      depthWrite: false,
+      colorWrite: false,
+    }),
+  );
+  interactionVolume.position.y = 0.98;
+  interactionVolume.name = `${config.name} interaction volume`;
+  group.add(interactionVolume);
+  attachInteraction(interactionVolume, interaction);
   model.traverse((child) => {
     if (!child.isMesh) return;
     child.castShadow = true;
@@ -2047,17 +2051,6 @@ function createContactDoor(materials) {
   soffit.position.set(0, doorHeight + 0.17, 0.16);
   const soffitEdge = new THREE.Mesh(new THREE.BoxGeometry(4.8, 0.075, 0.08), frameMaterial);
   soffitEdge.position.set(0, doorHeight + 0.14, -0.22);
-  const contactHeader = new THREE.Mesh(
-    new THREE.PlaneGeometry(2.75, 0.48),
-    new THREE.MeshBasicMaterial({
-      map: createContactHeaderTexture(),
-      transparent: true,
-      toneMapped: false,
-    }),
-  );
-  contactHeader.position.set(0, doorHeight + 0.53, -0.145);
-  contactHeader.rotation.y = Math.PI;
-
   const exteriorHintMaterial = new THREE.MeshStandardMaterial({
     color: '#b9b9af',
     roughness: 0.95,
@@ -2067,19 +2060,41 @@ function createContactDoor(materials) {
     new THREE.MeshStandardMaterial({ color: '#8a9c51', roughness: 1 }),
   ];
   const walkwayHint = new THREE.Mesh(
-    new THREE.BoxGeometry(4.4, 0.06, 9.2),
+    new THREE.BoxGeometry(4.4, 0.06, 11.6),
     exteriorHintMaterial,
   );
-  walkwayHint.position.set(0, -0.04, 4.5);
+  walkwayHint.position.set(0, -0.04, 5.7);
   const exteriorHints = [walkwayHint];
   for (const x of [-1.9, 1.9]) {
     const walkwayEdge = new THREE.Mesh(
-      new THREE.BoxGeometry(0.1, 0.07, 9.2),
+      new THREE.BoxGeometry(0.1, 0.07, 11.6),
       new THREE.MeshStandardMaterial({ color: '#969b94', roughness: 1 }),
     );
-    walkwayEdge.position.set(x, 0, 4.5);
+    walkwayEdge.position.set(x, 0, 5.7);
     exteriorHints.push(walkwayEdge);
   }
+  const createWalkwayBranch = (side) => {
+    const branch = new THREE.Group();
+    const points = [];
+    for (let index = 0; index <= 7; index += 1) {
+      const t = index / 7;
+      points.push(new THREE.Vector3(side * 5.7 * t * t, -0.035, 9.4 + 5.8 * t));
+    }
+    for (let index = 0; index < points.length - 1; index += 1) {
+      const start = points[index];
+      const end = points[index + 1];
+      const direction = end.clone().sub(start);
+      const segment = new THREE.Mesh(
+        new THREE.BoxGeometry(2.25, 0.055, direction.length() + 0.12),
+        exteriorHintMaterial,
+      );
+      segment.position.copy(start).add(end).multiplyScalar(0.5);
+      segment.rotation.y = Math.atan2(direction.x, direction.z);
+      branch.add(segment);
+    }
+    return branch;
+  };
+  exteriorHints.push(createWalkwayBranch(-1), createWalkwayBranch(1));
   [-1, 1].forEach((side) => {
     for (let index = 0; index < 5; index += 1) {
       const shrub = new THREE.Mesh(
@@ -2091,6 +2106,15 @@ function createContactDoor(materials) {
       exteriorHints.push(shrub);
     }
   });
+  for (const [x, z, scaleX] of [[-3.7, 5.2, 2.1], [3.8, 5.5, 2.25]]) {
+    const hedge = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(0.9, 1),
+      exteriorGreenMaterials[0],
+    );
+    hedge.position.set(x, 0.82, z);
+    hedge.scale.set(scaleX, 1.05, 1.45);
+    exteriorHints.push(hedge);
+  }
 
   group.add(
     leftDoor,
@@ -2107,7 +2131,6 @@ function createContactDoor(materials) {
     facadeHeader,
     soffit,
     soffitEdge,
-    contactHeader,
     ...exteriorHints,
   );
   group.position.set(DOOR_X, 0, DOOR_Z);
@@ -2116,13 +2139,13 @@ function createContactDoor(materials) {
   scene.add(group);
 
   const placard = new THREE.Mesh(
-    new THREE.PlaneGeometry(2.35, 0.92),
+    new THREE.PlaneGeometry(1.45, 1.92),
     new THREE.MeshBasicMaterial({
       map: createContactPlacardTexture(),
       toneMapped: false,
     }),
   );
-  placard.position.set(DOOR_X + 3.7, 1.62, DOOR_Z - 0.145);
+  placard.position.set(DOOR_X + 3.35, 1.72, DOOR_Z - 0.145);
   placard.rotation.y = Math.PI;
   scene.add(placard);
 
@@ -2146,7 +2169,6 @@ function createContactDoor(materials) {
     pullRight,
     soffit,
     soffitEdge,
-    contactHeader,
     placard,
   ]) {
     attachInteraction(mesh, interaction);
