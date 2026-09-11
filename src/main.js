@@ -413,30 +413,32 @@ function createContactPlacardTexture() {
   canvas.width = 540;
   canvas.height = 720;
   const context = canvas.getContext('2d');
-  context.fillStyle = '#f6f3ea';
+  context.fillStyle = 'rgba(246, 243, 234, 0.9)';
   context.fillRect(0, 0, canvas.width, canvas.height);
   context.fillStyle = '#000000';
   context.fillRect(0, 0, canvas.width, 18);
   context.fillStyle = '#1f2522';
-  context.font = '600 62px Segoe UI, Arial, sans-serif';
-  context.fillText('CONTACT', 44, 112);
+  context.font = '600 54px Segoe UI, Arial, sans-serif';
+  context.fillText('CONTACT', 44, 92);
   context.strokeStyle = '#c8c4ba';
   context.lineWidth = 2;
   context.beginPath();
-  context.moveTo(44, 154);
-  context.lineTo(496, 154);
+  context.moveTo(44, 126);
+  context.lineTo(496, 126);
   context.stroke();
+  context.font = '44px Georgia, Times New Roman, serif';
+  context.fillText('Start the', 44, 202);
+  context.fillText('conversation.', 44, 252);
   context.fillStyle = '#3f4742';
-  context.font = '500 36px Segoe UI, Arial, sans-serif';
-  context.fillText('Stephen Campbell', 44, 232);
-  context.fillStyle = '#767c76';
-  context.font = '400 27px Segoe UI, Arial, sans-serif';
-  context.fillText('WEB + INTERACTIVE', 44, 286);
-  context.fillText('PROJECT INQUIRIES', 44, 330);
+  context.font = '600 31px Segoe UI, Arial, sans-serif';
+  context.fillText('Stephen Campbell', 44, 348);
+  context.fillStyle = '#666d68';
+  context.font = '500 23px Segoe UI, Arial, sans-serif';
+  context.fillText('WEB + INTERACTIVE', 44, 390);
   context.fillStyle = '#292f2b';
   context.font = '500 25px Segoe UI, Arial, sans-serif';
-  context.fillText('campbell.t.stephen', 44, 430);
-  context.fillText('@gmail.com', 44, 470);
+  context.fillText('campbell.t.stephen', 44, 480);
+  context.fillText('@gmail.com', 44, 520);
   context.fillStyle = '#000000';
   context.font = '600 25px Segoe UI, Arial, sans-serif';
   context.fillText(`${interactionVerb} OR WALK THROUGH`, 44, 626);
@@ -1976,13 +1978,16 @@ function createContactDoor(materials) {
     metalness: 0.58,
   });
   const glassMaterial = new THREE.MeshPhysicalMaterial({
-    color: '#b8c7c8',
-    transparent: false,
-    opacity: 1,
-    roughness: 0.64,
+    color: '#dce5e3',
+    transparent: true,
+    opacity: 0.78,
+    roughness: 0.92,
     metalness: 0.03,
-    transmission: 0,
-    depthWrite: true,
+    transmission: 0.16,
+    thickness: 0.55,
+    attenuationColor: new THREE.Color('#d7e2df'),
+    attenuationDistance: 0.8,
+    depthWrite: false,
     side: THREE.DoubleSide,
   });
   const hardwareMaterial = new THREE.MeshStandardMaterial({
@@ -2036,6 +2041,40 @@ function createContactDoor(materials) {
   const soffitEdge = new THREE.Mesh(new THREE.BoxGeometry(4.8, 0.075, 0.08), frameMaterial);
   soffitEdge.position.set(0, doorHeight + 0.14, -0.22);
 
+  const exteriorHintMaterial = new THREE.MeshStandardMaterial({
+    color: '#b9b9af',
+    roughness: 0.95,
+  });
+  const exteriorGreenMaterials = [
+    new THREE.MeshStandardMaterial({ color: '#718b43', roughness: 1 }),
+    new THREE.MeshStandardMaterial({ color: '#8a9c51', roughness: 1 }),
+  ];
+  const walkwayHint = new THREE.Mesh(
+    new THREE.BoxGeometry(4.4, 0.06, 5.8),
+    exteriorHintMaterial,
+  );
+  walkwayHint.position.set(0, -0.04, 2.8);
+  const exteriorHints = [walkwayHint];
+  for (const x of [-1.9, 1.9]) {
+    const walkwayEdge = new THREE.Mesh(
+      new THREE.BoxGeometry(0.1, 0.07, 5.8),
+      new THREE.MeshStandardMaterial({ color: '#969b94', roughness: 1 }),
+    );
+    walkwayEdge.position.set(x, 0, 2.8);
+    exteriorHints.push(walkwayEdge);
+  }
+  [-1, 1].forEach((side) => {
+    for (let index = 0; index < 3; index += 1) {
+      const shrub = new THREE.Mesh(
+        new THREE.IcosahedronGeometry(0.56, 1),
+        exteriorGreenMaterials[index % exteriorGreenMaterials.length],
+      );
+      shrub.position.set(side * (2.45 + index * 0.48), 0.34 + index * 0.04, 1.8 + index * 0.72);
+      shrub.scale.set(1.25, 0.72, 0.9);
+      exteriorHints.push(shrub);
+    }
+  });
+
   group.add(
     leftDoor,
     rightDoor,
@@ -2051,6 +2090,7 @@ function createContactDoor(materials) {
     facadeHeader,
     soffit,
     soffitEdge,
+    ...exteriorHints,
   );
   group.position.set(DOOR_X, 0, DOOR_Z);
   group.name = 'contact door';
@@ -2059,11 +2099,45 @@ function createContactDoor(materials) {
 
   const placard = new THREE.Mesh(
     new THREE.PlaneGeometry(1.45, 1.92),
-    new THREE.MeshBasicMaterial({ map: createContactPlacardTexture(), toneMapped: false }),
+    new THREE.MeshBasicMaterial({
+      map: createContactPlacardTexture(),
+      transparent: true,
+      toneMapped: false,
+    }),
   );
-  placard.position.set(DOOR_X + 3.35, 1.72, DOOR_Z - 0.12);
+  placard.position.set(DOOR_X + 3.35, 1.72, DOOR_Z - 0.145);
   placard.rotation.y = Math.PI;
-  scene.add(placard);
+  const placardGlassMaterial = new THREE.MeshPhysicalMaterial({
+    color: '#f0eee7',
+    transparent: true,
+    opacity: 0.62,
+    roughness: 0.56,
+    transmission: 0.12,
+    thickness: 0.12,
+  });
+  const placardGlass = new THREE.Mesh(
+    new THREE.BoxGeometry(1.55, 2.02, 0.045),
+    placardGlassMaterial,
+  );
+  placardGlass.position.set(DOOR_X + 3.35, 1.72, DOOR_Z - 0.09);
+  const connectorRail = new THREE.Mesh(
+    new THREE.BoxGeometry(0.28, 0.055, 0.065),
+    frameMaterial,
+  );
+  connectorRail.position.set(DOOR_X + 2.515, 1.72, DOOR_Z - 0.08);
+  const standoffs = [];
+  for (const offsetX of [-0.69, 0.69]) {
+    for (const offsetY of [-0.92, 0.92]) {
+      const standoff = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.035, 0.035, 0.07, 16),
+        hardwareMaterial,
+      );
+      standoff.position.set(DOOR_X + 3.35 + offsetX, 1.72 + offsetY, DOOR_Z - 0.18);
+      standoff.rotation.x = Math.PI / 2;
+      standoffs.push(standoff);
+    }
+  }
+  scene.add(placardGlass, placard, connectorRail, ...standoffs);
 
   const interaction = {
     type: 'contact',
@@ -2086,6 +2160,9 @@ function createContactDoor(materials) {
     soffit,
     soffitEdge,
     placard,
+    placardGlass,
+    connectorRail,
+    ...standoffs,
   ]) {
     attachInteraction(mesh, interaction);
   }
