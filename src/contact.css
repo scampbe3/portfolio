@@ -113,6 +113,10 @@ body {
   align-self: flex-start;
 }
 
+.mobile-contact-lede {
+  display: none;
+}
+
 .legacy-frame {
   width: min(100%, 940px);
   margin: 0;
@@ -315,6 +319,17 @@ button:disabled {
     padding: 25px 0 0;
     border-top: 1px solid var(--line);
     border-left: 0;
+  }
+
+  .contact-panel > .lede {
+    display: none;
+  }
+
+  .mobile-contact-lede {
+    display: block;
+    width: 100%;
+    max-width: 760px;
+    margin: -6px 0 0;
   }
 
   .contact-form,
