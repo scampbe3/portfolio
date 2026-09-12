@@ -307,7 +307,14 @@ button:disabled {
     padding: 20px 20px 46px;
   }
 
+  .legacy-gallery {
+    width: 100%;
+    max-width: 760px;
+    justify-self: center;
+  }
+
   .legacy-frame {
+    width: 100%;
     max-width: 760px;
   }
 
