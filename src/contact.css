@@ -339,6 +339,7 @@ button:disabled {
     margin: -6px 0 0;
     padding-bottom: 20px;
     border-bottom: 1px solid var(--line);
+    margin-bottom: calc(clamp(34px, 5vw, 82px) - clamp(20px, 2vw, 30px));
   }
 
   .contact-form,
@@ -373,6 +374,10 @@ button:disabled {
   .contact-shell {
     gap: 30px;
     padding: 20px 14px 38px;
+  }
+
+  .mobile-contact-lede {
+    margin-bottom: calc(30px - clamp(20px, 2vw, 30px));
   }
 
   .contact-panel,
