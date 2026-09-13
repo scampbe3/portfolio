@@ -485,7 +485,7 @@ function createContactPlacardTexture() {
   context.fillText('@gmail.com', 44, 470);
   context.fillStyle = '#000000';
   context.font = '600 25px Segoe UI, Arial, sans-serif';
-  context.fillText(`${interactionVerb} OR WALK THROUGH`, 44, 626);
+  context.fillText(`${interactionVerb} OR WALK THROUGH THE DOORS`, 44, 626);
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
