@@ -84,6 +84,52 @@ const GALLERY_PROJECTS = [
   },
 ];
 
+const PROJECT_STILL_GALLERIES = [
+  [
+    ['main-radio-dashboard.png', -8.55, 3.05, 2.15],
+    ['station-table.png', -7.95, 1.25, 2.15],
+    ['weather-time-widget.png', -5.45, 2.92, 1.35],
+    ['browser-tab-stack.png', -5.05, 1.62, 1.55],
+    ['cinema-section.png', 5.6, 3.12, 1.9],
+    ['music-releases.png', 9.35, 2.78, 1.65],
+    ['live-player-detail.png', 6.7, 1.52, 1.75],
+    ['nav-strip.png', 9.55, 1.05, 1.55],
+  ],
+  [
+    ['about-hero.png', -7.15, 3.2, 2.25],
+    ['black-ownership.png', -7.15, 1.32, 2.15],
+    ['login-card.png', -4.65, 1.42, 0.9],
+    ['blind-dinners.png', 6.9, 3.18, 1.8],
+    ['decision-room-modal.png', 7.15, 1.25, 1.9],
+    ['food-feature.png', 9.55, 3.3, 1.55],
+    ['ownership-offer.png', 9.65, 1.7, 1.5],
+    ['inspiration-starts.png', -4.35, 3.15, 1.45],
+  ],
+  [
+    ['hero-video-interface.png', -7.05, 3.02, 2.25],
+    ['perspective-contact-footer.png', -6.3, 1.25, 2.05],
+    ['video-strip.png', 6.5, 3.15, 2.05],
+    ['location-selector.png', 9.45, 2.62, 1.75],
+    ['brand-lockup.png', 7.75, 1.2, 1.45],
+  ],
+  [
+    ['boss-fight.png', -4.55, 3.02, 1.75],
+    ['asteroid-chase.png', -4.55, 1.25, 1.75],
+    ['mobile-start.png', 4.2, 3.08, 0.72],
+    ['dialogue-hud.png', -15.0, 3.02, 1.35, 1],
+    ['space-combat.png', -15.0, 1.3, 1.4, 1],
+    ['menu-interface.png', -12.55, 3.18, 1.45, 1],
+    ['ship-targeting.png', -12.35, 1.35, 1.45, 1],
+  ],
+];
+
+const PROJECT_STILL_DIRECTORIES = [
+  'edm-planet',
+  'cupcakes-broccoli',
+  'skyscape-visions',
+  'star-cats',
+];
+
 const TREE_MODEL_URLS = [
   '../assets/models/tree-autumn-ember.glb',
   '../assets/models/tree-emerald-canopy.glb',
@@ -1295,6 +1341,131 @@ function createArtwork(project, previewTexture) {
   return interaction;
 }
 
+function createProjectStillFrame(
+  project,
+  wallProject,
+  texture,
+  horizontalPosition,
+  centerY,
+  requestedWidth,
+) {
+  const image = texture.image;
+  const aspectRatio = image?.naturalWidth && image?.naturalHeight
+    ? image.naturalWidth / image.naturalHeight
+    : 16 / 9;
+  const pictureWidth = Math.min(requestedWidth, 2.7);
+  const pictureHeight = Math.min(pictureWidth / aspectRatio, 1.42);
+  const fittedWidth = pictureHeight === pictureWidth / aspectRatio
+    ? pictureWidth
+    : pictureHeight * aspectRatio;
+  const matBorder = 0.075;
+  const liner = 0.035;
+  const rail = 0.075;
+  const outerWidth = fittedWidth + (matBorder + liner + rail) * 2;
+  const outerHeight = pictureHeight + (matBorder + liner + rail) * 2;
+  const group = new THREE.Group();
+  const charcoal = new THREE.MeshStandardMaterial({
+    color: '#242725',
+    roughness: 0.42,
+    metalness: 0.12,
+  });
+  const accent = new THREE.MeshStandardMaterial({
+    color: project.accent,
+    roughness: 0.55,
+    metalness: 0.06,
+  });
+  const mat = new THREE.MeshStandardMaterial({ color: '#f4f1e8', roughness: 0.9 });
+  const picture = new THREE.Mesh(
+    new THREE.PlaneGeometry(fittedWidth, pictureHeight),
+    new THREE.MeshBasicMaterial({ map: texture, toneMapped: false }),
+  );
+  const glass = new THREE.Mesh(
+    new THREE.PlaneGeometry(fittedWidth, pictureHeight),
+    new THREE.MeshPhysicalMaterial({
+      color: '#ffffff',
+      transparent: true,
+      opacity: 0.055,
+      roughness: 0.08,
+      depthWrite: false,
+    }),
+  );
+  const backing = new THREE.Mesh(
+    new THREE.PlaneGeometry(outerWidth - rail * 2, outerHeight - rail * 2),
+    mat,
+  );
+  const horizontalRail = new THREE.BoxGeometry(outerWidth, rail, 0.1);
+  const verticalRail = new THREE.BoxGeometry(rail, outerHeight, 0.1);
+  const top = new THREE.Mesh(horizontalRail, charcoal);
+  const bottom = new THREE.Mesh(horizontalRail, charcoal);
+  const left = new THREE.Mesh(verticalRail, charcoal);
+  const right = new THREE.Mesh(verticalRail, charcoal);
+  const linerHorizontal = new THREE.BoxGeometry(fittedWidth + liner * 2, liner, 0.055);
+  const linerVertical = new THREE.BoxGeometry(liner, pictureHeight + liner * 2, 0.055);
+  const linerTop = new THREE.Mesh(linerHorizontal, accent);
+  const linerBottom = new THREE.Mesh(linerHorizontal, accent);
+  const linerLeft = new THREE.Mesh(linerVertical, accent);
+  const linerRight = new THREE.Mesh(linerVertical, accent);
+
+  top.position.set(0, outerHeight / 2 - rail / 2, 0.05);
+  bottom.position.set(0, -outerHeight / 2 + rail / 2, 0.05);
+  left.position.set(-outerWidth / 2 + rail / 2, 0, 0.05);
+  right.position.set(outerWidth / 2 - rail / 2, 0, 0.05);
+  linerTop.position.set(0, pictureHeight / 2 + liner / 2, 0.075);
+  linerBottom.position.set(0, -pictureHeight / 2 - liner / 2, 0.075);
+  linerLeft.position.set(-fittedWidth / 2 - liner / 2, 0, 0.075);
+  linerRight.position.set(fittedWidth / 2 + liner / 2, 0, 0.075);
+  backing.position.z = 0.025;
+  picture.position.z = 0.085;
+  glass.position.z = 0.095;
+  glass.renderOrder = 2;
+
+  group.add(
+    backing,
+    top,
+    bottom,
+    left,
+    right,
+    linerTop,
+    linerBottom,
+    linerLeft,
+    linerRight,
+    picture,
+    glass,
+  );
+  group.position.copy(wallProject.position);
+  group.position.y = centerY;
+  group.rotation.y = wallProject.rotationY;
+  group.translateX(horizontalPosition);
+  group.translateZ(0.035);
+  group.name = `${project.title} project still`;
+  setMeshShadows(group, true, true);
+  picture.castShadow = false;
+  glass.castShadow = false;
+  scene.add(group);
+}
+
+async function createProjectStillGalleries() {
+  const loads = PROJECT_STILL_GALLERIES.flatMap((gallery, projectIndex) => (
+    gallery.map(async ([fileName, horizontalPosition, centerY, width, wallProjectIndex = projectIndex]) => {
+      const directory = PROJECT_STILL_DIRECTORIES[projectIndex];
+      const optimizedFileName = fileName.replace(/\.png$/i, '.jpg');
+      const texture = await loadTexture(
+        `../assets/textures/optimized/project-stills/${directory}/${optimizedFileName}`,
+      );
+      createProjectStillFrame(
+        GALLERY_PROJECTS[projectIndex],
+        GALLERY_PROJECTS[wallProjectIndex],
+        texture,
+        horizontalPosition,
+        centerY,
+        width,
+      );
+    })
+  ));
+  await Promise.all(loads);
+  renderer.shadowMap.needsUpdate = true;
+}
+
 function createNpcMaterial(color, roughness = 0.76, metalness = 0.02) {
   return new THREE.MeshStandardMaterial({
     color,
@@ -1979,7 +2150,7 @@ function updateNpcs(deltaSeconds, elapsedSeconds) {
   }
 }
 
-function createContactDoor(materials) {
+function createContactDoor(materials, hostTexture) {
   const group = new THREE.Group();
   const doorHeight = 3.18;
   const doorCenterY = doorHeight / 2;
@@ -2149,6 +2320,74 @@ function createContactDoor(materials) {
   placard.rotation.y = Math.PI;
   scene.add(placard);
 
+  const portraitGroup = new THREE.Group();
+  const portraitSize = 0.78;
+  const portraitOuterSize = 1.04;
+  const portraitRail = 0.07;
+  const portraitFrameMaterial = new THREE.MeshStandardMaterial({
+    color: '#202322',
+    roughness: 0.4,
+    metalness: 0.12,
+  });
+  const portraitMatMaterial = new THREE.MeshStandardMaterial({
+    color: '#f4f1e8',
+    roughness: 0.9,
+  });
+  const portraitMaterial = new THREE.MeshBasicMaterial({
+    map: hostTexture,
+    toneMapped: false,
+    transparent: true,
+    alphaTest: 0.5,
+  });
+  const portraitBacking = new THREE.Mesh(
+    new THREE.PlaneGeometry(portraitOuterSize - portraitRail * 2, portraitOuterSize - portraitRail * 2),
+    portraitMatMaterial,
+  );
+  const portrait = new THREE.Mesh(
+    new THREE.PlaneGeometry(portraitSize, portraitSize),
+    portraitMaterial,
+  );
+  const portraitBackground = new THREE.Mesh(
+    new THREE.PlaneGeometry(portraitSize, portraitSize),
+    new THREE.MeshBasicMaterial({ color: '#030504', toneMapped: false }),
+  );
+  const portraitHorizontalRail = new THREE.BoxGeometry(
+    portraitOuterSize,
+    portraitRail,
+    0.1,
+  );
+  const portraitVerticalRail = new THREE.BoxGeometry(
+    portraitRail,
+    portraitOuterSize,
+    0.1,
+  );
+  const portraitTop = new THREE.Mesh(portraitHorizontalRail, portraitFrameMaterial);
+  const portraitBottom = new THREE.Mesh(portraitHorizontalRail, portraitFrameMaterial);
+  const portraitLeft = new THREE.Mesh(portraitVerticalRail, portraitFrameMaterial);
+  const portraitRight = new THREE.Mesh(portraitVerticalRail, portraitFrameMaterial);
+  portraitTop.position.set(0, portraitOuterSize / 2 - portraitRail / 2, 0.045);
+  portraitBottom.position.set(0, -portraitOuterSize / 2 + portraitRail / 2, 0.045);
+  portraitLeft.position.set(-portraitOuterSize / 2 + portraitRail / 2, 0, 0.045);
+  portraitRight.position.set(portraitOuterSize / 2 - portraitRail / 2, 0, 0.045);
+  portraitBacking.position.z = 0.015;
+  portraitBackground.position.z = 0.065;
+  portrait.position.z = 0.075;
+  portraitGroup.add(
+    portraitBacking,
+    portraitBackground,
+    portrait,
+    portraitTop,
+    portraitBottom,
+    portraitLeft,
+    portraitRight,
+  );
+  portraitGroup.position.set(DOOR_X + 4.82, 1.72, DOOR_Z - 0.145);
+  portraitGroup.rotation.y = Math.PI;
+  portraitGroup.name = 'contact host portrait';
+  setMeshShadows(portraitGroup, true, true);
+  portrait.castShadow = false;
+  scene.add(portraitGroup);
+
   const interaction = {
     type: 'contact',
     group,
@@ -2170,6 +2409,13 @@ function createContactDoor(materials) {
     soffit,
     soffitEdge,
     placard,
+    portraitBacking,
+    portraitBackground,
+    portrait,
+    portraitTop,
+    portraitBottom,
+    portraitLeft,
+    portraitRight,
   ]) {
     attachInteraction(mesh, interaction);
   }
@@ -2695,18 +2941,29 @@ async function initialize() {
     loadTexture(project.screenshot)
   ));
   const skyboxPromise = loadTexture('../assets/textures/optimized/gallery-sky-runtime.jpg');
+  const hostPortraitPromise = loadTexture('../host.png');
   const modelPromises = GALLERY_NPCS
     .filter((config) => config.model)
     .map((config) => loadGalleryModel(config.model));
   const treeModelPromises = TREE_MODEL_URLS.map((url) => loadGalleryModel(url));
-  const [projectTextures, skyboxTexture, modelEntries, treeModelEntries] = await Promise.all([
+  const [
+    projectTextures,
+    skyboxTexture,
+    hostPortraitTexture,
+    modelEntries,
+    treeModelEntries,
+  ] = await Promise.all([
     Promise.all(texturePromises),
     skyboxPromise,
+    hostPortraitPromise,
     Promise.all(modelPromises),
     Promise.all(treeModelPromises),
   ]);
   const importedModels = new Map(modelEntries);
   const importedTrees = new Map(treeModelEntries);
+  hostPortraitTexture.repeat.set(2 / 3, 1);
+  hostPortraitTexture.offset.set(1 / 6, 0);
+  hostPortraitTexture.needsUpdate = true;
   applySkyboxTexture(skyboxTexture);
   createExteriorScenery(importedTrees);
 
@@ -2714,7 +2971,7 @@ async function initialize() {
     createArtwork(project, projectTextures[index]);
   });
   createGalleryNpcs(importedModels);
-  createContactDoor(materials);
+  createContactDoor(materials, hostPortraitTexture);
   if (previewMode && previewView?.startsWith('npc')) {
     const requestedIndex = Number.parseInt(previewView.slice(3), 10);
     const npcIndex = Number.isFinite(requestedIndex)
@@ -2757,6 +3014,17 @@ async function initialize() {
   window.__sceneReady = true;
   window.__sceneReadyAt = performance.now();
   window.__loadTimings.sceneReadyAt = window.__sceneReadyAt;
+
+  const loadProjectStills = () => {
+    createProjectStillGalleries().catch((error) => {
+      console.warn('Project still galleries could not be loaded.', error);
+    });
+  };
+  if ('requestIdleCallback' in window) {
+    window.requestIdleCallback(loadProjectStills, { timeout: 1200 });
+  } else {
+    window.setTimeout(loadProjectStills, 300);
+  }
 
   if (previewMode) {
     overlay.hidden = true;
