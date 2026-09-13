@@ -136,9 +136,7 @@ body {
 .legacy-image {
   display: block;
   width: 100%;
-  aspect-ratio: 16 / 9;
-  object-fit: contain;
-  background: #111716;
+  height: auto;
   filter: contrast(1.03) brightness(0.98);
 }
 
